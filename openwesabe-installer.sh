@@ -150,12 +150,12 @@ ruby -rrubygems -e "exit 1 if
   tar zxf rubygems-1.3.7.tgz
   cd rubygems-1.3.7
   sudo ruby setup.rb || exit 1
-  # TODO: sudo setup.rb can create ~/.gem as root
-  sudo chown -R "`id -un`:`id -gn`" "$dir" ~/.gem || exit 1
   sudo ln -sfv /usr/bin/gem1.8 /usr/bin/gem || exit 1
 ) || exit
 
 sudo gem install bundler thor || exit
+# FIXME: sudo gem install can create ~/.gem as root
+sudo chown -R "`id -un`:`id -gn`" "$dir" ~/.gem || exit 1
 bundle install || exit
 
 (
