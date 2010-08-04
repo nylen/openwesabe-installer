@@ -13,8 +13,8 @@ Then follow the on-screen instructions.  Some steps will take a long time.
 
 ## Note
 
-If you are starting from a fresh install of Ubuntu, it will probably be necessary to do at least a @sudo apt-get update@.  I'd also recommend a @sudo apt-get upgrade@.
+If you are starting from a fresh install of Ubuntu, it will probably be necessary to do at least a `sudo apt-get update`.  I'd also recommend a `sudo apt-get upgrade`.
 
 ## Prebuilt VMWare images
 
-You can find prebuilt Ubuntu Server VMware images at http://www.thoughtpolice.co.uk/vmware/.
+You can find prebuilt Ubuntu Server VMware images at [http://www.thoughtpolice.co.uk/vmware/].
