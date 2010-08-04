@@ -7,12 +7,19 @@ shopt -s expand_aliases
 alias sudo=sudo
 alias pkg="sudo apt-get install -y"
 
-echo "OpenWesabe installer - v0.1"
-echo "==========================="
-echo "You will be asked a series of questions.  Type your"
-echo "answers and press Enter, or just press Enter to pick"
-echo "the default options [which are in brackets]."
-echo ""
+cat <<EOF
+OpenWesabe installer - v0.1
+===========================
+
+You will be asked a series of questions.  Type your answers and press
+Enter, or just press Enter to pick the default options [which are in
+brackets].
+
+Some steps can take as long as 20-30 minutes.  If the process appears
+to complete without showing an informative message saying that it
+succeeded, that means the installation was aborted due to an error.
+
+EOF
 
 echo -n "Enter install directory [/opt/wesabe]: "
 read dir
@@ -39,12 +46,15 @@ gh_opt="fixofx" # optional repositories
 for repo in $gh_mand $gh_opt; do
   for proto in $gh_proto; do
     for user in $gh_user; do
-      if [[ "$success" != *$repo* ]] && git clone "$proto://github.com/$user/$repo.git"; then
+      if [[ "$success" != *$repo* ]] \
+        && git clone "$proto://github.com/$user/$repo.git"; then
+        
         success="$success $repo"
         if [ "$user" != wesabe ]; then (
           cd "$repo"
           url="$proto://github.com/wesabe/$repo"
-          git remote add upstream "$url" && echo "Added 'upstream' remote for '$repo': $url"
+          git remote add upstream "$url" \
+            && echo "Added 'upstream' remote for '$repo': $url"
         ) fi
       fi
     done
@@ -71,7 +81,7 @@ CREATE DATABASE IF NOT EXISTS pfc_development;
 CREATE DATABASE IF NOT EXISTS pfc_test;
 " | mysql -uroot -p"$mysql_pw_root" || exit
 
-echo -n "Enter NEW MySQL password for 'wesabe' (user and databases will be created): "
+echo -n "Enter NEW MySQL password for new user 'wesabe': "
 stty -echo; read mysql_pw; stty echo; echo
 
 echo -n "Confirm NEW MySQL password for 'wesabe': "
@@ -149,7 +159,7 @@ bundle install || exit
 sed -i \
   "s/\(username\): .*\$/\1: wesabe/; s/\(password\): .*\$/\1: $mysql_pw/" \
   config/database.yml \
-|| exit
+  || exit
 
 rake db:setup || exit
 
@@ -236,4 +246,8 @@ If everything worked properly, you can now access your copy of Wesabe
 by going to http://localhost:3000 in a web browser.  Note that if you
 are running Wesabe on a virtual machine, you will have to set up port
 forwarding yourself.
+
+It will take a few minutes for the Wesabe components to initialize -
+you need to wait for their output to stop scrolling before you try to
+load the application.
 EOF
