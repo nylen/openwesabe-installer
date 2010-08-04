@@ -17,4 +17,4 @@ If you are starting from a fresh install of Ubuntu, it will probably be necessar
 
 ## Prebuilt VMWare images
 
-You can find prebuilt Ubuntu Server VMware images at [http://www.thoughtpolice.co.uk/vmware/].
+You can find prebuilt Ubuntu Server VMware images [here](http://www.thoughtpolice.co.uk/vmware/).
