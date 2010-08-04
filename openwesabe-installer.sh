@@ -3,9 +3,16 @@
 unalias -a # is this needed?
 shopt -s expand_aliases
 
+apt_opts="-y"
+while getopts "n" o; do
+  case $o in
+    n) apt_opts="" ;;
+  esac
+done
+
 # TODO: These will be OS-dependent...
 alias sudo=sudo
-alias pkg="sudo apt-get install -y"
+alias pkg="sudo apt-get install $apt_opts"
 
 cat <<EOF
 OpenWesabe installer - v0.1
@@ -143,6 +150,8 @@ ruby -rrubygems -e "exit 1 if
   tar zxf rubygems-1.3.7.tgz
   cd rubygems-1.3.7
   sudo ruby setup.rb || exit 1
+  # TODO: sudo setup.rb can create ~/.gem as root
+  sudo chown -R "`id -un`:`id -gn`" "$dir" ~/.gem || exit 1
   sudo ln -sfv /usr/bin/gem1.8 /usr/bin/gem || exit 1
 ) || exit
 
