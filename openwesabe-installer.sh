@@ -22,9 +22,9 @@ You will be asked a series of questions.  Type your answers and press
 Enter, or just press Enter to pick the default options [which are in
 brackets].
 
-Some steps can take as long as 20-30 minutes.  If the process appears
-to complete without showing an informative message saying that it
-succeeded, that means the installation was aborted due to an error.
+Some steps can take as long as 20-30 minutes.  If the process ends
+before showing a message that says "Wesabe should now be running",
+that means the installation was aborted due to an error.
 
 EOF
 
@@ -153,7 +153,7 @@ ruby -rrubygems -e "exit 1 if
   sudo ln -sfv /usr/bin/gem1.8 /usr/bin/gem || exit 1
 ) || exit
 
-sudo gem install bundler thor || exit
+sudo gem install bundler thor charguess || exit
 # FIXME: sudo gem install can create ~/.gem as root
 sudo chown -R "`id -un`:`id -gn`" "$dir" ~/.gem || exit 1
 bundle install || exit
