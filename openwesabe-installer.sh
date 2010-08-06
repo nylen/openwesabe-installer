@@ -213,11 +213,41 @@ chmod +x start-wesabe-screen.sh
 cat <<EOF > start-wesabe-xterm.sh
 #!/bin/bash
 cd "$dir"
-alias setsid="`which setsid`"
-( cd pfc; setsid xterm sh -c "script/rails server; bash" ) &
-( cd brcm-accounts-api; setsid xterm sh -c "rake run; bash" ) &
+alias setsid="\`which setsid\`"
+(
+  cd pfc
+  setsid xterm -T pfc -e bash --rcfile "$dir/pfc.bashrc"
+) &
+(
+  cd brcm-accounts-api
+  setsid xterm -T brcm -e bash --rcfile "$dir/brcm.bashrc"
+) &
 EOF
 chmod +x start-wesabe-xterm.sh
+
+cat <<EOF > "$dir/pfc.bashrc"
+[ -f ~/.bashrc ] && . ~/.bashrc
+script/rails server
+echo '
+To run pfc again, type
+
+script/rails server
+
+and press Enter.
+'
+EOF
+
+cat <<EOF > "$dir/brcm.bashrc"
+[ -f ~/.bashrc ] && . ~/.bashrc
+rake run
+echo '
+To run brcm again, type
+
+rake run
+
+and press Enter.
+'
+EOF
 
 
 if [ x"$DISPLAY" = x -o x"`which xterm`" = x ]; then
