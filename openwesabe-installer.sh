@@ -1,6 +1,5 @@
 #!/bin/bash
 
-unalias -a # is this needed?
 shopt -s expand_aliases
 
 apt_opts="-y"
@@ -213,6 +212,7 @@ chmod +x start-wesabe-screen.sh
 cat <<EOF > start-wesabe-xterm.sh
 #!/bin/bash
 cd "$dir"
+shopt -s expand_aliases
 alias setsid="\`which setsid\`"
 (
   cd pfc
