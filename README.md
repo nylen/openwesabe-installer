@@ -6,10 +6,10 @@ changes).
 
 To install:
 
-    wget http://github.com/nylen/openwesabe-installer/raw/master/openwesabe-installer.sh
+    wget http://tinyurl.com/openwesabe-installer
     bash openwesabe-installer.sh
 
-Then follow the on-screen instructions.  Some steps will take a long time.
+Then follow the on-screen instructions.  Some steps will take a while.
 
 ## Note
 
@@ -21,6 +21,11 @@ If you are NOT starting from a fresh install of Ubuntu, I strongly
 recommend that you run the installer script as
 `bash openwesabe-installer.sh -n`.  This will prompt you to confirm
 package manager actions.
+
+If you encounter the following error:
+    E: Couldn't find package maven2
+This probably means you need to enable the Universe software repository
+(in Ubuntu, see the System -> Administration -> Software Sources tool).
 
 ## Prebuilt VMWare images
 
