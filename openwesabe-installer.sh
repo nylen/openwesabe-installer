@@ -31,7 +31,7 @@ EOF
 echo -n "Enter install directory [/opt/wesabe]: "
 read dir
 dir="${dir%/}"
-[ x"$dir" = x ] && dir="/opt/wesabe"
+[ -z "$dir" ] && dir="/opt/wesabe"
 
 sudo mkdir -p "$dir" || exit
 sudo chown "`id -un`:`id -gn`" "$dir" || exit
@@ -94,7 +94,7 @@ stty -echo; read mysql_pw; stty echo; echo
 echo -n "Confirm NEW MySQL password for 'wesabe': "
 stty -echo; read mysql_pw_confirm; stty echo; echo
 
-[ x"$mysql_pw" = x -o x"$mysql_pw" != x"$mysql_pw_confirm" ] \
+[ -z "$mysql_pw" -o "$mysql_pw" != "$mysql_pw_confirm" ] \
   && echo "Passwords are blank or do not match." && exit
 
 # Retardedly, MySQL doesn't have CREATE USER IF NOT EXISTS
@@ -250,7 +250,7 @@ and press Enter.
 EOF
 
 
-if [ x"$DISPLAY" = x -o x"`which xterm`" = x ]; then
+if [ -z "$DISPLAY" -o -z "`which xterm`" ]; then
 
 start="$dir/start-wesabe-screen.sh"
 "$start"
