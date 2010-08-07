@@ -130,7 +130,23 @@ for file in shore-0.2-SNAPSHOT xmlson-1.5.2; do
 done
 
 pkg rake || exit
-rake test || exit
+if ! rake test; then
+  echo -n '
+Some tests for the brcm-accounts-api project appear to have failed.
+Please review the error message(s) above.  If you have set your system
+to a non-US locale, you may see some errors like "expected $8.50 but
+got US$8.50" and it is probably OK to continue.  However, if the errors
+look more severe, like a failure to build the project, then you need to
+fix them before Wesabe will work on your computer.
+
+Press Enter to continue installing Wesabe.
+
+Press Ctrl+C or type exit to exit.
+
+What would you like to do [continue]? '
+  read action
+  [ "$action" = exit ] && exit
+fi
 
 
 ### pfc setup
