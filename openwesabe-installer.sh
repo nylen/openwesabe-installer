@@ -44,7 +44,7 @@ cd "$dir"
 
 [ -e "$configdir/gh_user" ] && gh_user=$(cat "$configdir/gh_user")
 echo -n "Enter your github username [${gh_user:-"I don't have one"}]: "
-#'# (this fixes geany's syntax highlighting from the line above)
+#'# (this fixes syntax highlighting in geany after the line above)
 read entry
 [ -z "$entry" ] || gh_user="$entry"
 echo -n "$gh_user" > "$configdir/gh_user"
@@ -95,7 +95,7 @@ done
 pkg mysql-server-5.1 || exit
 
 if [ -e "$dir/pfc/config/database.yml" -a \
-     -e "$dir/brcm-accounts-api/development/properties" ]; then
+     -e "$dir/brcm-accounts-api/development.properties" ]; then
   rewrite_db_config=no
 else
   rewrite_db_config=yes
