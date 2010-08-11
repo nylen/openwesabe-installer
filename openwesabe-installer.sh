@@ -27,17 +27,26 @@ that means the installation was aborted due to an error.
 
 EOF
 
-echo -n "Enter install directory [/opt/wesabe]: "
-read dir
-dir="${dir%/}"
-[ -z "$dir" ] && dir="/opt/wesabe"
+configdir=~/.openwesabe-installer
+mkdir -p $configdir
+
+[ -e "$configdir/dir" ] && dir=$(cat $configdir/dir)
+dir=${dir:-/opt/wesabe}
+echo -n "Enter install directory [$dir]: "
+read entry
+entry="${entry%/}"
+[ -z "$entry" ] || dir=$entry
+echo -n $dir > $configdir/dir
 
 sudo mkdir -p "$dir" || exit
 sudo chown "`id -un`:`id -gn`" "$dir" || exit
 cd "$dir"
 
-echo -n "Enter your github username [I don't have one]: "
-read gh_user
+[ -e "$configdir/gh_user" ] && gh_user=$(cat $configdir/gh_user)
+echo -n "Enter your github username [${gh_user:-"I don't have one"}]: "
+read entry
+[ -z "$entry" ] || gh_user=$entry
+echo -n $gh_user > $configdir/gh_user
 
 
 ### install git and download source
@@ -50,21 +59,26 @@ gh_mand="pfc brcm-accounts-api" # mandatory repositories
 gh_opt="fixofx" # optional repositories
 
 for repo in $gh_mand $gh_opt; do
-  for proto in $gh_proto; do
-    for user in $gh_user; do
-      if [[ "$success" != *$repo* ]] \
-        && git clone "$proto://github.com/$user/$repo.git"; then
-        
-        success="$success $repo"
-        if [ "$user" != wesabe ]; then (
-          cd "$repo"
-          url="$proto://github.com/wesabe/$repo"
-          git remote add upstream "$url" \
-            && echo "Added 'upstream' remote for '$repo': $url"
-        ) fi
-      fi
+  if [[ ! -d "$repo" ]]; then
+    for proto in $gh_proto; do
+      for user in $gh_user; do
+        if [[ "$success" != *$repo* ]] \
+          && git clone "$proto://github.com/$user/$repo.git"; then
+          
+          success="$success $repo"
+          if [ "$user" != wesabe ]; then (
+            cd "$repo"
+            url="$proto://github.com/wesabe/$repo"
+            git remote add upstream "$url" \
+              && echo "Added 'upstream' remote for '$repo': $url"
+          ) fi
+        fi
+      done
     done
-  done
+  else
+    echo "Skipping already-cloned repo $repo"
+    success="$success $repo"
+  fi
 done
 
 for repo in $gh_mand; do
@@ -79,33 +93,34 @@ done
 
 pkg mysql-server-5.1 || exit
 
-echo -n "Enter MySQL password for 'root' (you may have just set it): "
-stty -echo; read mysql_pw_root; stty echo; echo
-
-echo "
-CREATE DATABASE IF NOT EXISTS pfc_development;
-CREATE DATABASE IF NOT EXISTS pfc_test;
-" | mysql -uroot -p"$mysql_pw_root" || exit
-
-echo -n "Enter NEW MySQL password for new user 'wesabe': "
-stty -echo; read mysql_pw; stty echo; echo
-
-echo -n "Confirm NEW MySQL password for 'wesabe': "
-stty -echo; read mysql_pw_confirm; stty echo; echo
-
-[ -z "$mysql_pw" -o "$mysql_pw" != "$mysql_pw_confirm" ] \
-  && echo "Passwords are blank or do not match." && exit
-
-# Retardedly, MySQL doesn't have CREATE USER IF NOT EXISTS
-echo "
-CREATE USER 'wesabe'@'localhost' IDENTIFIED BY '$mysql_pw';
-" | mysql -uroot -p"$mysql_pw_root"
-
-echo "
-GRANT ALL ON pfc_development.* TO 'wesabe'@'localhost';
-GRANT ALL ON pfc_test.* TO 'wesabe'@'localhost';
-" | mysql -uroot -p"$mysql_pw_root" || exit
-
+if [ ! -e $dir/pfc/config/database.yml ]; then
+  echo -n "Enter MySQL password for 'root' (you may have just set it): "
+  stty -echo; read mysql_pw_root; stty echo; echo
+  
+  echo "
+  CREATE DATABASE IF NOT EXISTS pfc_development;
+  CREATE DATABASE IF NOT EXISTS pfc_test;
+  " | mysql -uroot -p"$mysql_pw_root" || exit
+  
+  echo -n "Enter NEW MySQL password for new user 'wesabe': "
+  stty -echo; read mysql_pw; stty echo; echo
+  
+  echo -n "Confirm NEW MySQL password for 'wesabe': "
+  stty -echo; read mysql_pw_confirm; stty echo; echo
+  
+  [ -z "$mysql_pw" -o "$mysql_pw" != "$mysql_pw_confirm" ] \
+    && echo "Passwords are blank or do not match." && exit
+  
+  # Retardedly, MySQL doesn't have CREATE USER IF NOT EXISTS
+  echo "
+  CREATE USER 'wesabe'@'localhost' IDENTIFIED BY '$mysql_pw';
+  " | mysql -uroot -p"$mysql_pw_root"
+  
+  echo "
+  GRANT ALL ON pfc_development.* TO 'wesabe'@'localhost';
+  GRANT ALL ON pfc_test.* TO 'wesabe'@'localhost';
+  " | mysql -uroot -p"$mysql_pw_root" || exit
+fi
 
 ### brcm setup
 
@@ -168,10 +183,11 @@ ruby -rrubygems -e "exit 1 if
   sudo ln -sfv /usr/bin/gem1.8 /usr/bin/gem || exit 1
 ) || exit
 
-sudo gem install bundler thor || exit
+sudo gem install bundler --pre --no-ri --no-rdoc || exit
+sudo gem install thor --no-ri --no-rdoc || exit
 # FIXME: sudo gem install can create ~/.gem as root
 sudo chown -R "`id -un`:`id -gn`" "$dir" ~/.gem || exit 1
-bundle install || exit
+bundle install --deployment || exit
 
 (
   cd config
@@ -185,7 +201,7 @@ sed -i \
   config/database.yml \
   || exit
 
-rake db:setup || exit
+bundle exec rake db:setup || exit
 
 cat <<EOF > "$dir/screenrc"
 chdir "$dir/pfc"
@@ -306,3 +322,5 @@ It will take a few minutes for the Wesabe components to initialize -
 you need to wait for their output to stop scrolling before you try to
 load the application.
 EOF
+
+rm -rf $configdir
