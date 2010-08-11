@@ -28,25 +28,26 @@ that means the installation was aborted due to an error.
 EOF
 
 configdir=~/.openwesabe-installer
-mkdir -p $configdir
+mkdir -p "$configdir"
 
-[ -e "$configdir/dir" ] && dir=$(cat $configdir/dir)
+[ -e "$configdir/dir" ] && dir=$(cat "$configdir/dir")
 dir=${dir:-/opt/wesabe}
 echo -n "Enter install directory [$dir]: "
 read entry
 entry="${entry%/}"
-[ -z "$entry" ] || dir=$entry
-echo -n $dir > $configdir/dir
+[ -z "$entry" ] || dir="$entry"
+echo -n "$dir" > "$configdir/dir"
 
 sudo mkdir -p "$dir" || exit
 sudo chown "`id -un`:`id -gn`" "$dir" || exit
 cd "$dir"
 
-[ -e "$configdir/gh_user" ] && gh_user=$(cat $configdir/gh_user)
+[ -e "$configdir/gh_user" ] && gh_user=$(cat "$configdir/gh_user")
 echo -n "Enter your github username [${gh_user:-"I don't have one"}]: "
+#'# (this fixes geany's syntax highlighting from the line above)
 read entry
-[ -z "$entry" ] || gh_user=$entry
-echo -n $gh_user > $configdir/gh_user
+[ -z "$entry" ] || gh_user="$entry"
+echo -n "$gh_user" > "$configdir/gh_user"
 
 
 ### install git and download source
@@ -59,7 +60,7 @@ gh_mand="pfc brcm-accounts-api" # mandatory repositories
 gh_opt="fixofx" # optional repositories
 
 for repo in $gh_mand $gh_opt; do
-  if [[ ! -d "$repo" ]]; then
+  if [ ! -d "$repo" ]; then
     for proto in $gh_proto; do
       for user in $gh_user; do
         if [[ "$success" != *$repo* ]] \
