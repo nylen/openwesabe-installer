@@ -94,7 +94,7 @@ done
 
 pkg mysql-server-5.1 || exit
 
-if [ -e "$dir/pfc/config/database.yml" -a
+if [ -e "$dir/pfc/config/database.yml" -a \
      -e "$dir/brcm-accounts-api/development/properties" ]; then
   rewrite_db_config=no
 else
