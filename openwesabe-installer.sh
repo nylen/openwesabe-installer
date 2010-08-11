@@ -148,7 +148,9 @@ fi
 
 for file in shore-0.2-SNAPSHOT xmlson-1.5.2; do
   for ext in pom jar; do
-    wget "http://dl.dropbox.com/u/40652/$file.$ext" || exit
+    if [ ! -e "$file.$ext" ]; then
+      wget "http://dl.dropbox.com/u/40652/$file.$ext" || exit
+    fi
   done
   mvn install:install-file -Dfile="$file.jar" -DpomFile="$file.pom" || exit
 done
