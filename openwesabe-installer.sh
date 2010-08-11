@@ -93,7 +93,14 @@ done
 
 pkg mysql-server-5.1 || exit
 
-if [ ! -e $dir/pfc/config/database.yml ]; then
+if [ -e "$dir/pfc/config/database.yml" -a
+     -e "$dir/brcm-accounts-api/development/properties" ]; then
+  rewrite_db_config=no
+else
+  rewrite_db_config=yes
+fi
+
+if [ $rewrite_db_config = yes ]; then
   echo -n "Enter MySQL password for 'root' (you may have just set it): "
   stty -echo; read mysql_pw_root; stty echo; echo
   
@@ -128,13 +135,15 @@ pkg openjdk-6-jdk maven2 || exit
 
 cd brcm-accounts-api
 
-cat <<EOF > development.properties
+if [ $rewrite_db_config = yes ]; then
+  cat <<EOF > development.properties
 hibernate.dialect=org.hibernate.dialect.MySQL5InnoDBDialect
 hibernate.connection.username=wesabe
 hibernate.connection.password=$mysql_pw
 hibernate.connection.url=jdbc:mysql://localhost:3306/pfc_development
 hibernate.generate_statistics=true
 EOF
+fi
 
 for file in shore-0.2-SNAPSHOT xmlson-1.5.2; do
   for ext in pom jar; do
@@ -189,17 +198,19 @@ sudo gem install thor --no-ri --no-rdoc || exit
 sudo chown -R "`id -un`:`id -gn`" "$dir" ~/.gem || exit 1
 bundle install --deployment || exit
 
-(
-  cd config
-  for f in *.example.yml; do
-    cp "$f" "${f%.example.yml}.yml"
-  done
-)
+if [ $rewrite_db_config = yes ]; then
+  (
+    cd config
+    for f in *.example.yml; do
+      cp "$f" "${f%.example.yml}.yml"
+    done
+  )
 
-sed -i \
-  "s/\(username\): .*\$/\1: wesabe/; s/\(password\): .*\$/\1: $mysql_pw/" \
-  config/database.yml \
-  || exit
+  sed -i \
+    "s/\(username\): .*\$/\1: wesabe/; s/\(password\): .*\$/\1: $mysql_pw/" \
+    config/database.yml \
+    || exit
+fi
 
 bundle exec rake db:setup || exit
 
