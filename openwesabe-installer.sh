@@ -215,6 +215,16 @@ if [ $rewrite_db_config = yes ]; then
     || exit
 fi
 
+# set up fixofx
+
+pkg python2.6
+
+cat <<EOF > config/initializers/99_local_env.rb
+silence_warnings do
+  OFX_CONVERTER = "python $dir/fixofx/fixofx.py"
+end
+EOF
+
 bundle exec rake db:setup || exit
 
 cat <<EOF > "$dir/screenrc"
