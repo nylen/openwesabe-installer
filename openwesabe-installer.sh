@@ -149,7 +149,7 @@ fi
 for file in shore-0.2-SNAPSHOT xmlson-1.5.2; do
   for ext in pom jar; do
     if [ ! -e "$file.$ext" ]; then
-      wget "http://dl.dropbox.com/u/40652/$file.$ext" || exit
+      wget "https://github.com/downloads/wesabe/mesabe/$file.$ext" || exit
     fi
   done
   mvn install:install-file -Dfile="$file.jar" -DpomFile="$file.pom" || exit
